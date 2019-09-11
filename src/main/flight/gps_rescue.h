@@ -21,6 +21,13 @@
 
 #include "pg/pg.h"
 
+// flight plan behaviour on failsafe can be controlled by BOXUSER1 failsafe state
+#define IS_FLIGHT_PLAN_MODE (IS_RC_MODE_ACTIVE(BOXUSER1) && !failsafeIsActive() && gpsRescueConfig()->total_waypoints > 0)
+
+#define FLIGHTPLAN_MAX_WAYPOINT_COUNT 10
+
+#define FLIGHTPLAN_DATA_LENGTH 16
+
 typedef struct gpsRescue_s {
     uint16_t angle; //degrees
     uint16_t initialAltitudeM; //meters
@@ -39,10 +46,47 @@ typedef struct gpsRescue_s {
     uint8_t useMag;
     uint16_t targetLandingAltitudeM; //meters
     uint16_t targetLandingDistanceM; //meters
-    uint8_t altitudeMode;
-    uint16_t ascendRate;
-    uint16_t descendRate;
+    uint8_t total_waypoints;
+    char gps_callibration_latitude [FLIGHTPLAN_DATA_LENGTH + 1];
+    char gps_callibration_longitude[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_01[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_02[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_03[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_04[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_05[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_06[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_07[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_08[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_09[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lat_10[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_01[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_02[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_03[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_04[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_05[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_06[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_07[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_08[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_09[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_lon_10[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_01[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_02[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_03[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_04[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_05[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_06[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_07[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_08[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_09[FLIGHTPLAN_DATA_LENGTH + 1];
+    char fp_alt_10[FLIGHTPLAN_DATA_LENGTH + 1];
+    
 } gpsRescueConfig_t;
+
+typedef enum {
+    RESCUE_HEALTHY,
+    RESCUE_GPSLOST,
+    RESCUE_CRASH_FLIP_DETECTED,
+} rescueFailureState_e;
 
 PG_DECLARE(gpsRescueConfig_t, gpsRescueConfig);
 
@@ -55,5 +99,11 @@ float gpsRescueGetYawRate(void);
 float gpsRescueGetThrottle(void);
 bool gpsRescueIsConfigured(void);
 bool gpsRescueIsAvailable(void);
+rescueFailureState_e gpsRescueGetRescueState (void);
 bool gpsRescueIsDisabled(void);
 bool gpsRescueDisableMag(void);
+
+int32_t getGPSAltitudeCm(void);
+int getFlightplanTargetWaypoint(void);
+uint16_t getGPSDistanceToHome(void);
+int16_t getGPSDirectionToHome(void);

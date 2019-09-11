@@ -369,12 +369,14 @@ static void rescueAttainPosition()
     if (IS_FLIGHT_PLAN_MODE)
     {
         if ((int)dist - (int)gpsSol.groundSpeed < 1000 && altitude_offset < 1000 && altitude_offset > -1000) flight_plan_target++;
-        
-        // apply throttle control to flight plan
-        float throttle_range = gpsRescueConfig()->throttleMax - gpsRescueConfig()->throttleMin;
-        float speed = constrainf ((float)(rcCommand[THROTTLE] - gpsRescueConfig()->throttleMin) / throttle_range, 0.0, 1.0);
-        angle = angle * speed;
-        altitude_offset = altitude_offset * speed;
+        if (!failsafeIsActive())
+        {        
+            // apply throttle control to flight plan
+            float throttle_range = gpsRescueConfig()->throttleMax - gpsRescueConfig()->throttleMin;
+            float speed = constrainf ((float)(rcCommand[THROTTLE] - gpsRescueConfig()->throttleMin) / throttle_range, 0.0, 1.0);
+            angle = angle * speed;
+            altitude_offset = altitude_offset * speed;
+        }
     }    
     
     float maxThrottle = (throttleMax - hover) * constrainf (dist / approach_distance, 0.0, 1.0);

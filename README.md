@@ -1,6 +1,6 @@
 ![Betaflight](docs/assets/images/betaflightplan.png)
 
-**This fork of Betaflight provides a robust flight plan mode suitable for multi-rotor craft with low cost GPS units.**
+**This fork of Betaflight provides a robust flight plan mode suitable for multi-rotor craft with GPS and no compass.**
 
 **Features:**
 - Unified algorithm for GPS rescue and Flight plan modes.

@@ -214,10 +214,10 @@ static void osdFormatAltitudeString(char * buff, int32_t altitudeCm)
     const int alt = osdGetMetersToSelectedUnit(altitudeCm) / 10;
 
     int pos = 0;
-    buff[pos++] = SYM_ALTITUDE;
-    if (alt < 0) {
+    if (alt < 0)
         buff[pos++] = '-';
-    }
+    else
+        buff[pos++] = '+';
     tfp_sprintf(buff + pos, "%01d.%01d%c", abs(alt) / 10 , abs(alt) % 10, osdGetMetersToSelectedUnitSymbol());
 }
 
@@ -506,7 +506,7 @@ static void osdElementAltitude(osdElementParms_t *element)
     haveGps = sensors(SENSOR_GPS) && STATE(GPS_FIX);
 #endif // USE_GPS
     if (haveBaro || haveGps) {
-        osdFormatAltitudeString(element->buff, getEstimatedAltitudeCm());
+        osdFormatAltitudeString(element->buff, getGPSAltitudeCm());
     } else {
         element->buff[0] = SYM_ALTITUDE;
         element->buff[1] = SYM_HYPHEN; // We use this symbol when we don't have a valid measure
@@ -807,31 +807,24 @@ static void osdElementGpsFlightDistance(osdElementParms_t *element)
 
 static void osdElementGpsHomeDirection(osdElementParms_t *element)
 {
-    if (STATE(GPS_FIX) && STATE(GPS_FIX_HOME)) {
-        if (GPS_distanceToHome > 0) {
-            const int h = GPS_directionToHome - DECIDEGREES_TO_DEGREES(attitude.values.yaw);
-            element->buff[0] = osdGetDirectionSymbolFromHeading(h);
-        } else {
-            element->buff[0] = SYM_OVER_HOME;
-        }
-
+    if (getGPSDistanceToHome() > 0) {
+        const int h = getGPSDirectionToHome() - DECIDEGREES_TO_DEGREES(attitude.values.yaw);
+        element->buff[0] = osdGetDirectionSymbolFromHeading(h);
     } else {
-        // We use this symbol when we don't have a FIX
-        element->buff[0] = SYM_HYPHEN;
+        element->buff[0] = SYM_OVER_HOME;
     }
-
     element->buff[1] = 0;
 }
 
 static void osdElementGpsHomeDistance(osdElementParms_t *element)
 {
-    if (STATE(GPS_FIX) && STATE(GPS_FIX_HOME)) {
-        osdFormatDistanceString(element->buff, GPS_distanceToHome, SYM_HOMEFLAG);
-    } else {
-        element->buff[0] = SYM_HOMEFLAG;
-        // We use this symbol when we don't have a FIX
-        element->buff[1] = SYM_HYPHEN;
-        element->buff[2] = '\0';
+    if (IS_RC_MODE_ACTIVE(BOXGPSRESCUE) && IS_FLIGHT_PLAN_MODE)
+    {
+        tfp_sprintf(element->buff, "W%d %d%c", (int)(getFlightplanTargetWaypoint()+1), (int)getGPSDistanceToHome(), osdGetMetersToSelectedUnitSymbol());
+    }
+    else
+    {
+        tfp_sprintf(element->buff, "%d%c", (int)getGPSDistanceToHome(), osdGetMetersToSelectedUnitSymbol());
     }
 }
 
@@ -1262,8 +1255,8 @@ static void osdElementWarnings(osdElementParms_t *element)
 
 #ifdef USE_GPS_RESCUE
     if (osdWarnGetState(OSD_WARNING_GPS_RESCUE_UNAVAILABLE) &&
-       ARMING_FLAG(ARMED) &&
-       gpsRescueIsConfigured() &&
+       (ARMING_FLAG(ARMED) || IS_RC_MODE_ACTIVE(BOXGPSRESCUE)) &&
+       (gpsRescueIsConfigured() || IS_RC_MODE_ACTIVE(BOXGPSRESCUE)) &&
        !gpsRescueIsDisabled() &&
        !gpsRescueIsAvailable()) {
         tfp_sprintf(element->buff, "RESCUE N/A");
@@ -1272,8 +1265,8 @@ static void osdElementWarnings(osdElementParms_t *element)
     }
 
     if (osdWarnGetState(OSD_WARNING_GPS_RESCUE_DISABLED) &&
-       ARMING_FLAG(ARMED) &&
-       gpsRescueIsConfigured() &&
+       (ARMING_FLAG(ARMED) || IS_RC_MODE_ACTIVE(BOXGPSRESCUE)) &&
+       (gpsRescueIsConfigured() || IS_RC_MODE_ACTIVE(BOXGPSRESCUE)) &&
        gpsRescueIsDisabled()) {
 
         statistic_t *stats = osdGetStats();
@@ -1284,6 +1277,21 @@ static void osdElementWarnings(osdElementParms_t *element)
         }
     }
 
+    if (IS_RC_MODE_ACTIVE(BOXGPSRESCUE))
+    {
+        if (gpsRescueGetRescueState() == RESCUE_GPSLOST)
+            tfp_sprintf(element->buff, "GPS LOST");
+        else if (gpsRescueGetRescueState() == RESCUE_CRASH_FLIP_DETECTED)
+            tfp_sprintf(element->buff, "GPS CRASH");
+        else if (IS_FLIGHT_PLAN_MODE)
+            tfp_sprintf(element->buff, "FLTPLAN ON");
+        else
+            tfp_sprintf(element->buff, "GPS RESCUE");
+
+        SET_BLINK(OSD_WARNINGS);
+        return;
+    }
+       
 #endif // USE_GPS_RESCUE
 
     // Show warning if in HEADFREE flight mode
@@ -1671,7 +1679,7 @@ void osdUpdateAlarms(void)
 {
     // This is overdone?
 
-    int32_t alt = osdGetMetersToSelectedUnit(getEstimatedAltitudeCm()) / 100;
+    int32_t alt = osdGetMetersToSelectedUnit(getGPSAltitudeCm()) / 100;
 
     if (getRssiPercent() < osdConfig()->rssi_alarm) {
         SET_BLINK(OSD_RSSI_VALUE);

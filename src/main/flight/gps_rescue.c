@@ -170,30 +170,6 @@ static uint16_t gps_distance_to_home;        // distance to home point in meters
 static int16_t gps_direction_to_home;        // direction to home or hol point in degrees
 
 
-/*
-// fred finch cricket pitch south end -34.48145370	150.83462480
-// tamarind lounge                    -34.45024450	150.82501710
-
-double gps_callibration_latitude = -34.48145370 * GPS_DEGREES_DIVIDER;
-double gps_callibration_longitude = 150.83462480 * GPS_DEGREES_DIVIDER;
-
-double flight_plan_latitude[] =
-{
-    -34.48151010 * GPS_DEGREES_DIVIDER,    
-    -34.48186830 * GPS_DEGREES_DIVIDER,    
-    -34.48179750 * GPS_DEGREES_DIVIDER,    
-    -34.48159630 * GPS_DEGREES_DIVIDER
-};
-
-double flight_plan_longitude[] =
-{
-    150.83509950 * GPS_DEGREES_DIVIDER,
-    150.83503250 * GPS_DEGREES_DIVIDER,
-    150.83453630 * GPS_DEGREES_DIVIDER,
-    150.83459120 * GPS_DEGREES_DIVIDER
-};
-*/
-
 void rescueNewGpsData(void)
 {
     newGPSData = true;

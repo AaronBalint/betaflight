@@ -78,3 +78,9 @@ Flight plan way-point latitude, longitude in degrees and altitude from launch in
 - The flight plan is reset to the first way-point when only GPS RESCUE mode is enabled.
 - You can pause / continue a flight plan by exiting / entering GPS RESCUE and TELEMETRY modes simultaneously.
 - All altitude settings are relative to the altitude at launch.
+
+**OSD**
+
+When a flight plan is activated, The Home Direction and Home Distance display will be relative to the next waypoint.  The Home Distance will also display the current active wat-point number (1-10).
+
+When un-armed the Altitude will display the current GPS altitude above sea level. When armed the Altitude will be relative to the launch altitude.

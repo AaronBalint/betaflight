@@ -306,8 +306,8 @@ static void rescueAttainPosition()
         return;
     }
     
-    float approach_distance = gpsRescueConfig()->descentDistanceM * 100.0; // 50m gps_rescue_descent_dist
-    float angle_distance = gpsRescueConfig()->targetLandingDistanceM * 100.0; // 20m gps_rescue_landing_dist
+    float approach_distance = gpsRescueConfig()->descentDistanceM * 100.0;
+    float angle_distance = gpsRescueConfig()->targetLandingDistanceM * 100.0;
         
     gps_altitude = gpsSol.llh.altCm;
     gps_latitude = gpsSol.llh.lat;

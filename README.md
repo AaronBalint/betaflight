@@ -7,7 +7,7 @@
 - Simplified GPS rescue state engine.
 - Continuous GPS orientation calibration.
 - Home position calibration to easily verify GPS accuracy.
-- Flight plan can be paused / continued.
+- Flight plan mission can be paused / continued.
 - Flight plan execution speed can be directly controlled by throttle input.
 - Flight plan can override failsafe for full autonomous flight.
 

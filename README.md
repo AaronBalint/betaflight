@@ -51,8 +51,8 @@ The distance from the home or way-point position at which maximum throttle is gr
 
 The distance from the home or way-point position at which the maximum flight angle is reduced towards zero.
 
-**gps_rescue_cal_lat**
-**gps_rescue_cal_lon**
+**gps_rescue_cal_lat
+gps_rescue_cal_lon**
 
 Home point calibration position.  When not armed, the OSD GPS distance is set against the calibration point. This allows you to easily check that the GPS position is within your required tolerance.
 
@@ -60,9 +60,9 @@ Home point calibration position.  When not armed, the OSD GPS distance is set ag
 
 Total number of way-points in the flight plan.  Zero disables the flight plan. A single way-point will make the quad fly to and hold the corresponding position. More than one way-point will be flown in a continuous cycle.
 
-**fplan_lat_01**  [01...10]
-**fplan_lon_01**  [01...10]
-**fplan_alt_01**  [01...10]
+**fplan_lat_01
+fplan_lon_01
+fplan_alt_01**  [01...10]
 
 Flight plan way-point latitude, longitude in degrees and altitude in meters. Up to 10 way-points can be set.
 

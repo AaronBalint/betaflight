@@ -1,9 +1,9 @@
 ![Betaflight](docs/assets/images/betaflightplan.png)
 
-**This fork of Betaflight provides a robust flight plan mode suitable for multi-rotor craft with GPS and no compass.**
+**This fork of Betaflight provides a robust mission flight plan mode suitable for multi-rotor craft with GPS and no compass.**
 
 **Features:**
-- Unified algorithm for GPS rescue and Flight plan modes.
+- Unified algorithm for GPS rescue and flight plan modes.
 - Simplified GPS rescue state engine.
 - Continuous GPS orientation calibration.
 - Home position calibration to easily verify GPS accuracy.
@@ -13,7 +13,7 @@
 
 **FOR SAFETY PLEASE OBSERVE THE FOLLOWING:**
 
-- Each way-point should have a 20 meter radius of clear air space.  The flight plan algorithm is NOT intended for high precision autonomous flight.
+- Each way-point should have a 20 meter radius of clear air space.  The mission flight plan algorithm is NOT intended for high precision autonomous flight.
 - On first use set conservative values for gps_rescue_throttle_max  (less than 100 from the hover point) and set gps_rescue_angle to no more than 30 degrees.
 - Make sure gps_rescue_throttle_hover is set accurately. 
 
@@ -21,7 +21,7 @@
 
 **gps_rescue_angle**
 
-This is the maximum flight angle for GPS recovery and flight plan manoeuvres.  A higher value will result in faster horizontal movement and is independent of  gps_rescue_throttle_max.
+This is the maximum flight angle for GPS recovery and mission flight plan manoeuvres.  A higher value will result in faster horizontal movement and is independent of  gps_rescue_throttle_max.
 
 **gps_rescue_throttle_hover**
 
@@ -55,7 +55,7 @@ The distance from the home or way-point position at which the maximum flight ang
 
 **gps_rescue_cal_lon**
 
-Home point calibration position.  When not armed, the OSD GPS distance is set against the calibration point. This allows you to easily check that the GPS position is within your required tolerance.
+Home point calibration position.  When not armed, the OSD GPS distance is set against the calibration point. This allows you to easily check that the GPS position is within your required mission tolerance.
 
 **fplan_waypoints**
 
@@ -72,11 +72,11 @@ Flight plan way-point latitude, longitude in degrees and altitude from launch in
 **IMPORTANT NOTES:**
 
 - Flight plan execution requires both GPS RESCUE and TELEMETRY modes to be active.
-- The flight plan will continue to execute if both modes are active during failsafe.
+- The flight plan mission will continue to execute if both modes are active during failsafe.
 - GPS orientation is only updated when the ground speed exceeds 3m/s (11 km/h).
-- When flying a flight plan the throttle controls the speed of flight plan execution.
+- The throttle controls the speed of flight plan execution during a mission.
 - The flight plan is reset to the first way-point when only GPS RESCUE mode is enabled.
-- You can pause / continue a flight plan by exiting / entering GPS RESCUE and TELEMETRY modes simultaneously.
+- You can pause / continue a flight plan mission by exiting / entering GPS RESCUE and TELEMETRY modes simultaneously.
 - All altitude settings are relative to the altitude at launch.
 
 **OSD**
@@ -85,4 +85,4 @@ When unarmed the Home Distance will display the distance to the home calibration
 
 When unarmed the Altitude will display the current GPS altitude above sea level. When armed the Altitude will be relative to the launch altitude.
 
-When a flight plan is activated, The Home Direction and Home Distance will be relative to the next way-point.  The Home Distance will also display the current active way-point number (W1-10).
+When a flight plan mission is activated, The Home Direction and Home Distance will be relative to the next way-point.  The Home Distance will also display the current active way-point number (W1-10).

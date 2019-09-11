@@ -67,7 +67,7 @@ Total number of way-points in the flight plan.  Zero disables the flight plan. A
 
 **fplan_alt_01 .. 10**
 
-Flight plan way-point latitude, longitude in degrees and altitude in meters. Up to 10 way-points can be set.
+Flight plan way-point latitude, longitude in degrees and altitude from launch in meters. Up to 10 way-points can be set.
 
 **IMPORTANT NOTES:**
 
@@ -77,3 +77,4 @@ Flight plan way-point latitude, longitude in degrees and altitude in meters. Up 
 - When flying a flight plan the throttle controls the speed of flight plan execution.
 - The flight plan is reset to the first way-point when only GPS RESCUE mode is enabled.
 - You can pause / continue a flight plan by exiting / entering GPS RESCUE and TELEMETRY modes simultaneously.
+- All altitude settings are relative to the altitude at launch.

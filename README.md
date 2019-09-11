@@ -3,13 +3,13 @@
 **This fork of Betaflight provides a robust flight plan mode suitable for multi-rotor craft with low cost GPS units.**
 
 **Features:**
-Unified algorithm for GPS rescue and Flight plan modes.
-Simplified GPS rescue state engine.
-Continuous GPS orientation calibration.
-Home position calibration to easily verify GPS accuracy.
-Flight plan can be paused / continued.
-Flight plan execution speed can be directly controlled by throttle input.
-Flight plan can override failsafe for full autonomous flight.
+- Unified algorithm for GPS rescue and Flight plan modes.
+- Simplified GPS rescue state engine.
+- Continuous GPS orientation calibration.
+- Home position calibration to easily verify GPS accuracy.
+- Flight plan can be paused / continued.
+- Flight plan execution speed can be directly controlled by throttle input.
+- Flight plan can override failsafe for full autonomous flight.
 
 **Rational:**  I was experimenting with the Betaflight GPS rescue mode  (Tyro 79 with BN-180) and found it somewhat unreliable with the quad often flying off in the wrong direction. Investigation revealed that the GPS orientation calibration is only done once and may be inaccurate with a low cost GPS unit.  I also wanted to experiment with autonomous flight using just a GPS (no compass).
 

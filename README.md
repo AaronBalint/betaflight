@@ -14,7 +14,7 @@
 **FOR SAFETY PLEASE OBSERVE THE FOLLOWING:**
 
 - Each way-point should have a 20 meter radius of clear air space.  The flight plan algorithm is NOT intended for high precision autonomous flight.
-- When first using set conservative values for gps_rescue_throttle_max  (less than 100 from the hover point) and set gps_rescue_angle to no more than 30 degrees.
+- On first use set conservative values for gps_rescue_throttle_max  (less than 100 from the hover point) and set gps_rescue_angle to no more than 30 degrees.
 - Make sure gps_rescue_throttle_hover is set accurately. 
 
 **Configuration settings (CLI):**

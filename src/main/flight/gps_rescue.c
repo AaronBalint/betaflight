@@ -479,6 +479,7 @@ void updateGPSRescueState(void)
         
     case RESCUE_ACTIVE:
         rescueAttainPosition();
+        break;
     }
 
     newGPSData = false;

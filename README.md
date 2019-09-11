@@ -81,6 +81,8 @@ Flight plan way-point latitude, longitude in degrees and altitude from launch in
 
 **OSD**
 
-When a flight plan is activated, The Home Direction and Home Distance display will be relative to the next way-point.  The Home Distance will also display the current active way-point number (W1-10).
+When unarmed the Home Distance will display the distance to the home calibration point.
 
 When unarmed the Altitude will display the current GPS altitude above sea level. When armed the Altitude will be relative to the launch altitude.
+
+When a flight plan is activated, The Home Direction and Home Distance display will be relative to the next way-point.  The Home Distance will also display the current active way-point number (W1-10).

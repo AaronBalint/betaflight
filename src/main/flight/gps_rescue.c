@@ -382,9 +382,9 @@ static void rescueAttainPosition()
 
     int16_t throttle;
     if (altitude_offset < -3000.0)
-        throttle = gpsRescueConfig()->throttleMax; // rapid climb.
+        throttle = gpsRescueConfig()->throttleMax; // rapid climb
     else if (altitude_offset > 3000.0)
-        throttle = gpsRescueConfig()->throttleMin; // this can be set to idle to allow quad to drop rapidly from high altitude.
+        throttle = gpsRescueConfig()->throttleMin; // rapid descent
     else if (altitude_offset > 0)
         throttle = hover - maxThrottle;
     else if (altitude_offset < 0)

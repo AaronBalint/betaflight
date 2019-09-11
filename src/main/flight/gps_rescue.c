@@ -166,8 +166,8 @@ float  flight_plan_altitudeM[FLIGHTPLAN_MAX_WAYPOINT_COUNT];
 
 static int flight_plan_target = 0;
 static int32_t altitude_from_takeoff;
-static uint16_t gps_distance_to_home;        // distance to home point in meters
-static int16_t gps_direction_to_home;        // direction to home or hol point in degrees
+static uint16_t gps_distance_to_home; // distance to home or waypoint in meters
+static int16_t gps_direction_to_home; // direction to home or waypoint in degrees
 
 
 void rescueNewGpsData(void)

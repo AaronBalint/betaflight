@@ -22,7 +22,7 @@
 #include "pg/pg.h"
 
 // flight plan behaviour on failsafe can be controlled by BOXTELEMETRY failsafe state
-#define IS_FLIGHT_PLAN_MODE (IS_RC_MODE_ACTIVE(BOXTELEMETRY) && !failsafeIsActive() && gpsRescueConfig()->total_waypoints > 0)
+#define IS_FLIGHT_PLAN_MODE (IS_RC_MODE_ACTIVE(BOXTELEMETRY) && gpsRescueConfig()->total_waypoints > 0)
 
 #define FLIGHTPLAN_MAX_WAYPOINT_COUNT 10
 

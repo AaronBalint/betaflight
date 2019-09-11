@@ -83,7 +83,7 @@ static bool imuUpdated = false;
 #define ATTITUDE_RESET_GYRO_LIMIT 15       // 15 deg/sec - gyro limit for quiet period
 #define ATTITUDE_RESET_KP_GAIN    25.0     // dcmKpGain value to use during attitude reset
 #define ATTITUDE_RESET_ACTIVE_TIME 500000  // 500ms - Time to wait for attitude to converge at high gain
-#define GPS_COG_MIN_GROUNDSPEED 500        // 500cm/s minimum groundspeed for a gps heading to be considered valid
+#define GPS_COG_MIN_GROUNDSPEED 300        // 500cm/s minimum groundspeed for a gps heading to be considered valid
 
 int32_t accSum[XYZ_AXIS_COUNT];
 float accAverage[XYZ_AXIS_COUNT];
@@ -461,8 +461,7 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
         }
 
         if (useCOG && shouldInitializeGPSHeading()) {
-            // Reset our reference and reinitialize quaternion.  This will likely ideally happen more than once per flight, but for now,
-            // shouldInitializeGPSHeading() returns true only once.
+            // Reset our reference and reinitialize quaternion
             imuComputeQuaternionFromRPY(&qP, attitude.values.roll, attitude.values.pitch, gpsSol.groundCourse);
 
             useCOG = false; // Don't use the COG when we first reinitialize.  Next time around though, yes.
@@ -550,12 +549,15 @@ void imuUpdateAttitude(timeUs_t currentTimeUs)
 
 bool shouldInitializeGPSHeading()
 {
-    static bool initialized = false;
+    // regularly update gps heading
+    static uint32_t previousTimeUs = 0;
+    const uint32_t currentTimeUs = micros();
 
-    if (!initialized) {
-        initialized = true;
+    const float dTime = currentTimeUs - previousTimeUs;
 
-        return true;
+    if (dTime > 1000000) { //1hz
+        previousTimeUs = currentTimeUs;
+        return true;;
     }
 
     return false;

@@ -11,7 +11,8 @@
 - Flight plan execution speed can be directly controlled by throttle input.
 - Flight plan can override failsafe for full autonomous flight.
 
-**Rational:**  I was experimenting with the Betaflight GPS rescue mode  (Tyro 79 with BN-180) and found it somewhat unreliable with the quad often flying off in the wrong direction. Investigation revealed that the GPS orientation calibration is only done once and may be inaccurate with a low cost GPS unit.  I also wanted to experiment with autonomous flight using just a GPS (no compass).
+**Rational:**  
+I was experimenting with the Betaflight GPS rescue mode  (Tyro 79 with BN-180) and found it somewhat unreliable with the quad often flying off in the wrong direction. Investigation revealed that the GPS orientation calibration is only done once and may be inaccurate with a low cost GPS unit.  I also wanted to experiment with autonomous flight using just a GPS (no compass).
 
 **FOR SAFETY PLEASE OBSERVE THE FOLLOWING:**
 

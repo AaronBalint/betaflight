@@ -88,4 +88,5 @@ When unarmed the Altitude will display the current GPS altitude above sea level.
 When a flight plan mission is activated, The Home Direction and Home Distance will be relative to the next way-point.  The Home Distance will also display the current active way-point number (W1-10).
 
 **Betaflight_plan Releases**
+
 https://github.com/AaronBalint/betaflight_plan/releases

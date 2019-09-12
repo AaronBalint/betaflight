@@ -59,7 +59,7 @@ Home point calibration position.  When not armed, the OSD GPS distance is set ag
 
 **fplan_waypoints**
 
-Total number of way-points in the flight plan.  Zero disables the flight plan. A single way-point will make the quad fly to and hold the corresponding position. More than one way-point will be flown in a continuous cycle.
+Total number of way-points in the flight plan.  Zero disables the flight plan. A single way-point will make the quad fly to and hold the corresponding position. Two or more way-points will be flown in a continuous cycle.
 
 **fplan_lat_01 .. 10**
 

@@ -552,12 +552,11 @@ bool shouldInitializeGPSHeading()
     // regularly update gps heading
     static uint32_t previousTimeUs = 0;
     const uint32_t currentTimeUs = micros();
-
-    const float dTime = currentTimeUs - previousTimeUs;
+    const uint32_t dTime = currentTimeUs - previousTimeUs;
 
     if (dTime > 1000000) { //1hz
         previousTimeUs = currentTimeUs;
-        return true;;
+        return true;
     }
 
     return false;

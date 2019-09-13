@@ -73,7 +73,7 @@ Flight plan way-point latitude, longitude in degrees and altitude from launch in
 
 - Flight plan execution requires both GPS RESCUE and TELEMETRY modes to be active.
 - The flight plan mission will continue to execute if both modes are active during failsafe.
-- GPS orientation is only updated when the ground speed exceeds 3m/s (11 km/h).
+- GPS orientation is only updated when the ground speed exceeds 2m/s (7 km/h).
 - The throttle controls the speed of flight plan execution during a mission.
 - The flight plan is reset to the first way-point when only GPS RESCUE mode is enabled.
 - You can pause / continue a flight plan mission by exiting / entering GPS RESCUE and TELEMETRY modes simultaneously.

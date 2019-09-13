@@ -92,6 +92,7 @@ When a flight plan mission is activated, The Home Direction and Home Distance wi
 https://github.com/AaronBalint/betaflight_plan/releases
 
 
+
 **What is 'robust' GPS autonomous flight?**
 
 Put simply, this is where the orientation of the quadcopter is continuously recalibrated using the GPS course over ground data. This technique elegantly resolves two issues:

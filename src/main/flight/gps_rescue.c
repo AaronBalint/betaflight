@@ -46,6 +46,7 @@
 
 #include "pg/pg.h"
 #include "pg/pg_ids.h"
+#include "pg/motor.h"
 
 #include "rx/rx.h"
 
@@ -372,8 +373,8 @@ static void rescueAttainPosition()
         if (!failsafeIsActive())
         {        
             // apply throttle control to flight plan
-            float throttle_range = gpsRescueConfig()->throttleMax - gpsRescueConfig()->throttleMin;
-            float speed = constrainf ((float)(rcCommand[THROTTLE] - gpsRescueConfig()->throttleMin) / throttle_range, 0.0, 1.0);
+            float throttle_range = motorConfig()->maxthrottle - motorConfig()->minthrottle;
+            float speed = constrainf ((float)(rcCommand[THROTTLE] - motorConfig()->minthrottle) / throttle_range, 0.0, 1.0);
             angle = angle * speed;
             altitude_offset = altitude_offset * speed;
         }

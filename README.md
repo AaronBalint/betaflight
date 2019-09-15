@@ -99,5 +99,5 @@ Put simply, this is where the orientation of the quadcopter is continuously reca
 1) Recovering from inaccurate GPS positional data (particularly at low ground speed) and
 2) Correcting the flight path attitude due to cross-wind.
 
-Any lateral movement will introduce an error to the calculated orientation, however this error actually turns the quadcopter into the cross-wind.  Natural feedback from continuous calibration results in accurate directional flight to the next way-point.
+Any lateral movement due to cross-wind will introduce an error to the calculated orientation, however this error actually turns the quadcopter into the cross-wind.  Natural feedback from continuous calibration results in accurate directional flight to the next way-point.
 

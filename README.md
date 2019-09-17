@@ -9,7 +9,6 @@
 - Home position calibration to easily verify GPS accuracy.
 - Flight plan mission can be paused / continued.
 - Flight plan execution speed can be directly controlled by throttle input.
-- Flight plan can override failsafe for full autonomous flight.
 
 **FOR SAFETY PLEASE OBSERVE THE FOLLOWING:**
 

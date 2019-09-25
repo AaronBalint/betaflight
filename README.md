@@ -2,6 +2,11 @@
 
 **This fork of Betaflight provides a robust mission flight plan mode suitable for multi-rotor craft with GPS and no compass.**
 
+**Version 4.2.0 release**
+- Improved gps rescue algorithm to prevent high throttle settings at home position.
+- Improved waypoint handling using derivative positioning.
+- Introduced proportional roll for high speed flight plan execution.
+
 **Features:**
 - Unified algorithm for GPS rescue and flight plan modes.
 - Simplified GPS rescue state engine.

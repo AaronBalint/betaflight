@@ -921,11 +921,11 @@ const clivalue_t valueTable[] = {
 
 #ifdef USE_GPS_RESCUE
     // PG_GPS_RESCUE
-    { "gps_rescue_angle",           VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 0, 70 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t,  angle) },
-    { "gps_rescue_initial_alt",     VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 30, 200 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, initialAltitudeM) },
-    { "gps_rescue_approach_dist",    VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 5, 200 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, descentDistanceM) },
-    { "gps_rescue_landing_alt",     VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 5, 50 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, targetLandingAltitudeM) },
-    { "gps_rescue_landing_dist",    VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 5, 50 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, targetLandingDistanceM) },
+    { "gps_rescue_max_angle",       VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 0,  70 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t,  angle) },
+    { "gps_rescue_return_alt",      VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 30, 200 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, initialAltitudeM) },
+    { "gps_rescue_approach_dist",   VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 20, 200 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, descentDistanceM) },
+    { "gps_rescue_home_alt",        VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 10, 50 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, targetLandingAltitudeM) },
+    //{ "gps_rescue_landing_dist",    VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 5, 50 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, targetLandingDistanceM) },
     //{ "gps_rescue_ground_speed",    VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 10, 3000 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, rescueGroundspeed) },
     { "gps_rescue_throttle_p",      VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 0, 500 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, throttleP) },
     { "gps_rescue_throttle_i",      VAR_UINT16 | MASTER_VALUE, .config.minmaxUnsigned = { 0, 500 }, PG_GPS_RESCUE, offsetof(gpsRescueConfig_t, throttleI) },

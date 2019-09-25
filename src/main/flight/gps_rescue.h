@@ -45,7 +45,7 @@ typedef struct gpsRescue_s {
     uint8_t allowArmingWithoutFix;
     uint8_t useMag;
     uint16_t targetLandingAltitudeM; //meters
-    uint16_t targetLandingDistanceM; //meters
+    //uint16_t targetLandingDistanceM; //meters
     uint8_t total_waypoints;
     char gps_callibration_latitude [FLIGHTPLAN_DATA_LENGTH + 1];
     char gps_callibration_longitude[FLIGHTPLAN_DATA_LENGTH + 1];

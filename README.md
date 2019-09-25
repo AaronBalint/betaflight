@@ -17,7 +17,7 @@
 
 **FOR SAFETY PLEASE OBSERVE THE FOLLOWING:**
 
-- Each way-point should have a 20 meter radius of clear air space.  The mission flight plan algorithm is NOT intended for high precision autonomous flight.
+- Each way-point should have a **20 metre radius** of clear air space.
 - On first use set conservative values for gps_rescue_throttle_max  (less than 100 from the hover point) and set gps_rescue_angle to no more than 30 degrees.
 - Make sure gps_rescue_throttle_hover is set accurately.
 - Align the front of the craft towards North before connecting the battery.

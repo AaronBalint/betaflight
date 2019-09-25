@@ -20,7 +20,7 @@
 
 **Configuration settings (CLI):**
 
-**gps_rescue_angle**
+**gps_rescue_max_angle**
 
 This is the maximum flight angle for GPS recovery and mission flight plan manoeuvres.  A higher value will result in faster horizontal movement and is independent of  gps_rescue_throttle_max.
 
@@ -36,21 +36,17 @@ This is the maximum throttle used  for altitude positioning and determines how a
 
 This value will determine how quickly the quad will fall to the required altitude. Must be less than gps_rescue_throttle_hover.
 
-**gps_rescue_initial_alt**
+**gps_rescue_return_alt**
 
 GPS rescue only.  The return to home altitude in meters.
 
-**gps_rescue_landing_alt**
+**gps_rescue_home_alt**
 
 GPS rescue only.  The at home altitude in meters.
 
 **gps_rescue_approach_dist**
 
-The distance from the home or way-point position at which maximum throttle is gradually reduced towards the hover setting.
-
-**gps_rescue_landing_dist**
-
-The distance from the home or way-point position at which the maximum flight angle is reduced towards zero.
+The distance from the home position at which maximum flight speed is gradually reduced towards the hover setting.
 
 **gps_rescue_cal_lat**
 

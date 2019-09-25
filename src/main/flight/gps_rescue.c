@@ -75,6 +75,13 @@ typedef enum {
 #define GPS_RESCUE_MAX_YAW_RATE         180 // deg/sec max yaw rate
 #define GPS_RESCUE_RATE_SCALE_DEGREES    45 // Scale the commanded yaw rate when the error is less then this angle
 
+#define GPS_RESCUE_MIN_ROLL_ADJUST_SPEED 200  // cm/s
+#define GPS_RESCUE_MAX_ROLL_ADJUST_SPEED 500  // cm/s
+#define GPS_RESCUE_MAX_ROLL              35   // XXX - should not exceed 45 degrees?
+
+#define GPS_RESCUE_MIN_THROTTLE_ADJUST   50   // The minumum throttle adjustment required to maintain altitude
+#define WAYPOINT_PROXIMITY               1000 // cm - how close we need to get to the way-point before moving onto the next
+
 #ifdef USE_MAG
 #define GPS_RESCUE_USE_MAG              true
 #else
@@ -104,7 +111,7 @@ PG_RESET_TEMPLATE(gpsRescueConfig_t, gpsRescueConfig,
     .allowArmingWithoutFix = false,
     .useMag = GPS_RESCUE_USE_MAG,
     .targetLandingAltitudeM = 20,
-    .targetLandingDistanceM = 20,
+    //.targetLandingDistanceM = 20,
     .total_waypoints = 0,
     .gps_callibration_latitude = { 0 },
     .gps_callibration_longitude = { 0 },
@@ -149,14 +156,14 @@ rescueState_s rescueState;
 
 double gps_latitude = 0;
 double gps_longitude = 0;
-double gps_home_altitude = 0;
+double gps_home_altitude_cm = 0;
 double gps_home_latitude = 0;
 double gps_home_longitude = 0;
 
-double gps_altitude = 0;
-double last_gps_altitude;
+double gps_altitude_cm = 0;
+double last_gps_altitude_cm;
 uint32_t last_gps_altitudeTimeUs = 0;
-int gps_Z_velocity = 0;
+int gps_Z_velocity_cm = 0;
 
 double gps_callibration_latitude = 0;
 double gps_callibration_longitude = 0;
@@ -166,7 +173,7 @@ double flight_plan_longitude[FLIGHTPLAN_MAX_WAYPOINT_COUNT];
 float  flight_plan_altitudeM[FLIGHTPLAN_MAX_WAYPOINT_COUNT];
 
 static int flight_plan_target = 0;
-static int32_t altitude_from_takeoff;
+static int32_t altitude_from_takeoff_cm;
 static uint16_t gps_distance_to_home; // distance to home or waypoint in meters
 static int16_t gps_direction_to_home; // direction to home or waypoint in degrees
 
@@ -226,7 +233,7 @@ static void rescueStop()
 void GPS_cm_bearing(double currentLat1, double currentLon1, double destinationLat2, double destinationLon2, uint32_t *dist, int32_t *bearing)
 {
     double dLat = destinationLat2 - currentLat1; // difference of latitude in 1/10 000 000 degrees
-    double dLon = (double)(destinationLon2 - currentLon1);// * GPS_scaleLonDown;
+    double dLon = destinationLon2 - currentLon1; // * GPS_scaleLonDown;
     *dist = sqrtf(sq(dLat) + sq(dLon)) * DISTANCE_BETWEEN_TWO_LONGITUDE_POINTS_AT_EQUATOR_IN_HUNDREDS_OF_KILOMETERS;
 
     *bearing = 9000.0f + atan2_approx(-dLat, dLon) * TAN_89_99_DEGREES;      // Convert the output radians to 100xdeg
@@ -237,14 +244,14 @@ void GPS_cm_bearing(double currentLat1, double currentLon1, double destinationLa
 void GPS_cm_distance (double Lat1, double Lon1, double Lat2, double Lon2, uint32_t *dist)
 {
     double dLat = Lat2 - Lat1; // difference of latitude in 1/10 000 000 degrees
-    double dLon = (double)(Lon2 - Lon1);// * GPS_scaleLonDown;
+    double dLon = Lon2 - Lon1; // * GPS_scaleLonDown;
     *dist = sqrtf(sq(dLat) + sq(dLon)) * DISTANCE_BETWEEN_TWO_LONGITUDE_POINTS_AT_EQUATOR_IN_HUNDREDS_OF_KILOMETERS;
 }
 
 // Things that need to run regardless of GPS rescue mode being enabled or not
 static void idleTasks()
 {
-    gps_altitude = gpsSol.llh.altCm;
+    gps_altitude_cm = gpsSol.llh.altCm;
     gps_latitude = gpsSol.llh.lat;
     gps_longitude = gpsSol.llh.lon;
     
@@ -252,14 +259,14 @@ static void idleTasks()
     {
         gps_callibration_latitude =  (double)fastA2F (gpsRescueConfig()->gps_callibration_latitude) * GPS_DEGREES_DIVIDER;
         gps_callibration_longitude = (double)fastA2F (gpsRescueConfig()->gps_callibration_longitude) * GPS_DEGREES_DIVIDER;
-        gps_home_altitude = gpsSol.llh.altCm;
+        gps_home_altitude_cm = gpsSol.llh.altCm;
         gps_home_latitude = gpsSol.llh.lat;
         gps_home_longitude = gpsSol.llh.lon;
-        altitude_from_takeoff = (int32_t)(gps_home_altitude);
+        altitude_from_takeoff_cm = (int32_t)(gps_home_altitude_cm);
     }
     else
     {
-        altitude_from_takeoff = (int32_t)(gps_altitude - gps_home_altitude);
+        altitude_from_takeoff_cm = (int32_t)(gps_altitude_cm - gps_home_altitude_cm);
     }
 
     uint32_t dist;
@@ -293,8 +300,24 @@ static void setBearing (int16_t desiredHeading)
     rescueYaw = -constrainf(errorAngle / GPS_RESCUE_RATE_SCALE_DEGREES * GPS_RESCUE_MAX_YAW_RATE, -GPS_RESCUE_MAX_YAW_RATE, GPS_RESCUE_MAX_YAW_RATE);
 }
 
-static void rescueAttainPosition()
+static float getBearing (float current_heading, int16_t desiredHeading)
 {
+    float errorAngle = current_heading - desiredHeading;
+
+    // Determine the most efficient direction to rotate
+    if (errorAngle <= -180) {
+        errorAngle += 360;
+    } else if (errorAngle > 180) {
+        errorAngle -= 360;
+    }
+
+    errorAngle *= -GET_DIRECTION(rcControlsConfig()->yaw_control_reversed);
+        
+    return (-constrainf(errorAngle, -GPS_RESCUE_MAX_YAW_RATE, GPS_RESCUE_MAX_YAW_RATE));
+}
+
+static void rescueAttainPosition()
+{    
     if (crashRecoveryModeActive()) rescueState.failure = RESCUE_CRASH_FLIP_DETECTED;
     else if (!gpsIsHealthy()) rescueState.failure = RESCUE_GPSLOST;
     else rescueState.failure = RESCUE_HEALTHY;
@@ -303,101 +326,128 @@ static void rescueAttainPosition()
     {
         // hold position
         gpsRescueAngle[AI_PITCH] = 0;
+        gpsRescueAngle[AI_ROLL] = 0;
         rescueThrottle = gpsRescueConfig()->throttleHover;
         return;
     }
     
-    float approach_distance = gpsRescueConfig()->descentDistanceM * 100.0;
-    float angle_distance = gpsRescueConfig()->targetLandingDistanceM * 100.0;
-        
-    gps_altitude = gpsSol.llh.altCm;
+    gps_altitude_cm = gpsSol.llh.altCm;
     gps_latitude = gpsSol.llh.lat;
     gps_longitude = gpsSol.llh.lon;
-
-    uint32_t dist;
-    int32_t dir;
-    float targetAltitudeCm;
     
+    // XXX = Experimental ==================================================================
+    
+    float courseOverGround = DECIDEGREES_TO_RADIANS (gpsSol.groundCourse);
+    
+    while (courseOverGround >  M_PIf) {
+        courseOverGround -= (2.0f * M_PIf);
+    }
+
+    while (courseOverGround < -M_PIf) {
+        courseOverGround += (2.0f * M_PIf);
+    }
+
+    float d_lat = cos_approx(courseOverGround) * gpsSol.groundSpeed / DISTANCE_BETWEEN_TWO_LONGITUDE_POINTS_AT_EQUATOR_IN_HUNDREDS_OF_KILOMETERS;
+    float d_lon = sin_approx(courseOverGround) * gpsSol.groundSpeed / DISTANCE_BETWEEN_TWO_LONGITUDE_POINTS_AT_EQUATOR_IN_HUNDREDS_OF_KILOMETERS;
+    
+    gps_latitude  += (double)d_lat;
+    gps_longitude += (double)d_lon;
+    
+    // XXX = Experimental ================================================================== */
+
+    uint32_t dist_to_target_cm;
+    int32_t direction_to_target;
+    
+    float target_altitude_cm;
+    float safe_approach_distance_cm;
+            
     if (IS_FLIGHT_PLAN_MODE)
     {
+        safe_approach_distance_cm = WAYPOINT_PROXIMITY;
+            
         // follow flight plan
         int p = flight_plan_target % gpsRescueConfig()->total_waypoints;
-        GPS_cm_bearing (gps_latitude, gps_longitude, flight_plan_latitude[p], flight_plan_longitude[p], &dist, &dir);
+        GPS_cm_bearing (gps_latitude, gps_longitude, flight_plan_latitude[p], flight_plan_longitude[p], &dist_to_target_cm, &direction_to_target);
         
         if (flight_plan_target == 0 || gpsRescueConfig()->total_waypoints == 1)
         {
-            targetAltitudeCm = flight_plan_altitudeM[0] * 100;
+            target_altitude_cm = flight_plan_altitudeM[0] * 100;
         }
         else
         {
             int p0 = (flight_plan_target-1) % gpsRescueConfig()->total_waypoints;
             uint32_t waypoint_dist;
-            GPS_cm_distance  (flight_plan_latitude[p0], flight_plan_longitude[p0], flight_plan_latitude[p], flight_plan_longitude[p], &waypoint_dist);
-            
-            float ratio = constrainf ((float)dist / (float)waypoint_dist, 0.0, 1.0);
-            targetAltitudeCm = ((flight_plan_altitudeM[p0] * ratio) + (flight_plan_altitudeM[p] * (1.0 - ratio))) * 100;
-            
-            if (waypoint_dist < approach_distance) approach_distance = waypoint_dist;
-            if (waypoint_dist < angle_distance) angle_distance = waypoint_dist;
-            
-            // if we fly beyond next waypoint go into high angle mode
-            uint32_t dist_from_p0;
-            GPS_cm_distance  (gps_latitude, gps_longitude, flight_plan_latitude[p0], flight_plan_longitude[p0], &dist_from_p0);
-            if (dist_from_p0 > waypoint_dist) angle_distance = 1.0;
+            GPS_cm_distance  (flight_plan_latitude[p0], flight_plan_longitude[p0], flight_plan_latitude[p], flight_plan_longitude[p], &waypoint_dist);            
+            float ratio = constrainf ((float)dist_to_target_cm / (float)waypoint_dist, 0.0, 1.0);
+            target_altitude_cm = ((flight_plan_altitudeM[p0] * ratio) + (flight_plan_altitudeM[p] * (1.0 - ratio))) * 100;
         }
     }
     else
     {
+        safe_approach_distance_cm = gpsRescueConfig()->descentDistanceM * 100.0;
+
         flight_plan_target = 0; // reset flight plan
-        GPS_cm_bearing (gps_latitude, gps_longitude, gps_home_latitude, gps_home_longitude, &dist, &dir);
-        targetAltitudeCm = constrainf (dist/2.0, gpsRescueConfig()->targetLandingAltitudeM * 100, gpsRescueConfig()->initialAltitudeM * 100);
+        GPS_cm_bearing (gps_latitude, gps_longitude, gps_home_latitude, gps_home_longitude, &dist_to_target_cm, &direction_to_target);
+        target_altitude_cm = constrainf (dist_to_target_cm/2.0, gpsRescueConfig()->targetLandingAltitudeM * 100, gpsRescueConfig()->initialAltitudeM * 100);
     }
                              
-    gps_distance_to_home = dist / 100;
-    gps_direction_to_home = dir / 100;
-    altitude_from_takeoff = (int32_t)(gps_altitude - gps_home_altitude);
+    gps_distance_to_home = dist_to_target_cm / 100;
+    gps_direction_to_home = direction_to_target / 100;
+    altitude_from_takeoff_cm = (int32_t)(gps_altitude_cm - gps_home_altitude_cm);
         
     setBearing (gps_direction_to_home);
             
-    float hover = gpsRescueConfig()->throttleHover;
-    float throttleMax = gpsRescueConfig()->throttleMax;
+    // for safety GPS rescue throttle is controlled by horizontal distance only
+    float throttle_distance_cm = dist_to_target_cm;
     
-    // set angle based on distance away
-    float angle = constrainf ((float)dist / angle_distance, 0.0, 1.0);
-    
-    float altitude_offset = (float)altitude_from_takeoff + gps_Z_velocity - targetAltitudeCm;
+    float altitude_offset_cm = (float)altitude_from_takeoff_cm + gps_Z_velocity_cm - target_altitude_cm;
+    float speed = 1.0f;
     
     if (IS_FLIGHT_PLAN_MODE)
     {
-        if ((int)dist - (int)gpsSol.groundSpeed < 1000 && altitude_offset < 1000 && altitude_offset > -1000) flight_plan_target++;
+        throttle_distance_cm = sqrt (sq(altitude_offset_cm) + sq(dist_to_target_cm)); // - gpsSol.groundSpeed)); // XXX
+        if (throttle_distance_cm < WAYPOINT_PROXIMITY) flight_plan_target++;
         if (!failsafeIsActive())
-        {        
+        {
             // apply throttle control to flight plan
             float throttle_range = motorConfig()->maxthrottle - motorConfig()->minthrottle;
-            float speed = constrainf ((float)(rcCommand[THROTTLE] - motorConfig()->minthrottle) / throttle_range, 0.0, 1.0);
-            angle = angle * speed;
-            altitude_offset = altitude_offset * speed;
+            speed = constrainf ((float)(rcCommand[THROTTLE] - motorConfig()->minthrottle) / throttle_range, 0.0, 1.0);
         }
     }    
     
-    float maxThrottle = (throttleMax - hover) * constrainf (dist / approach_distance, 0.0, 1.0);
-    if (maxThrottle < 50) maxThrottle = 50;
-
-    int16_t throttle;
-    if (altitude_offset < -3000.0)
-        throttle = gpsRescueConfig()->throttleMax; // rapid climb
-    else if (altitude_offset > 3000.0)
-        throttle = gpsRescueConfig()->throttleMin; // rapid descent
-    else if (altitude_offset > 0)
-        throttle = hover - maxThrottle;
-    else if (altitude_offset < 0)
-        throttle = hover + maxThrottle;
+    float roll = 0;
+    float roll_adjust;    
+    if (fabsf(getBearing(attitude.values.yaw / 10.0f, gps_direction_to_home)) < 90.0f) // facing towards desired direction
+    {
+        // banked turns at high speed
+        float course_error_degrees = getBearing (gpsSol.groundCourse / 10.0f, gps_direction_to_home);
+        float dir = (course_error_degrees < 0 ? -1 : 1);
+        // We may still be moving away from the next waypoint - we need to adjust the roll value accordingly
+        if (dir * course_error_degrees > 90) course_error_degrees = dir * (180 - (dir * course_error_degrees));
+        roll = constrainf (course_error_degrees * (-GET_DIRECTION(rcControlsConfig()->yaw_control_reversed)), -GPS_RESCUE_MAX_ROLL, GPS_RESCUE_MAX_ROLL);
+        roll_adjust = constrainf ((gpsSol.groundSpeed - GPS_RESCUE_MIN_ROLL_ADJUST_SPEED) / GPS_RESCUE_MAX_ROLL_ADJUST_SPEED, 0.0, 1.0);
+    }
+    
+    // set angle based on distance away
+    float angle_adjust = speed * constrainf (2.0f * (float)dist_to_target_cm / safe_approach_distance_cm, 0.0, 1.0);
+    
+    float throttle_adjust;
+    if (altitude_offset_cm > safe_approach_distance_cm)
+    {
+        // allow rapid descent
+        throttle_adjust = speed * (gpsRescueConfig()->throttleMin - gpsRescueConfig()->throttleHover);
+    }
     else
-        throttle = hover;
-          
+    {
+        throttle_adjust = speed * (gpsRescueConfig()->throttleMax - gpsRescueConfig()->throttleHover) * constrainf (throttle_distance_cm / safe_approach_distance_cm, 0.0, 1.0);
+        if (throttle_adjust < GPS_RESCUE_MIN_THROTTLE_ADJUST) throttle_adjust = GPS_RESCUE_MIN_THROTTLE_ADJUST;
+        if (altitude_offset_cm > 0) throttle_adjust *= -1.0f;
+    }
+         
     // final result
-    gpsRescueAngle[AI_PITCH] = 100.0 * angle * gpsRescueConfig()->angle;        
-    rescueThrottle = constrain (throttle, gpsRescueConfig()->throttleMin, gpsRescueConfig()->throttleMax);
+    gpsRescueAngle[AI_ROLL] = roll * roll_adjust * 100.0;
+    gpsRescueAngle[AI_PITCH] = angle_adjust * gpsRescueConfig()->angle * 100.0;        
+    rescueThrottle = constrain (gpsRescueConfig()->throttleHover + throttle_adjust, gpsRescueConfig()->throttleMin, gpsRescueConfig()->throttleMax);
 }
 
 static void sensorUpdate()
@@ -405,8 +455,8 @@ static void sensorUpdate()
     // calculate Z velocity per second
     if (micros() - last_gps_altitudeTimeUs > 1000000)
     {
-        gps_Z_velocity = gps_altitude - last_gps_altitude; // cm
-        last_gps_altitude = gps_altitude;
+        gps_Z_velocity_cm = gps_altitude_cm - last_gps_altitude_cm; // cm
+        last_gps_altitude_cm = gps_altitude_cm;
         last_gps_altitudeTimeUs = micros();
     }
 }
@@ -527,7 +577,7 @@ bool gpsRescueIsDisabled(void)
 
 int32_t getGPSAltitudeCm(void)
 {
-    return altitude_from_takeoff;
+    return altitude_from_takeoff_cm;
 }
 
 int getFlightplanTargetWaypoint(void)
